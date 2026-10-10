@@ -1,0 +1,41 @@
+import type * as schema from '../db/schema';
+
+type Jsonify<Value> = Value extends Date ? string : Value extends (infer Item)[] ? Jsonify<Item>[] : Value extends object ? { [Key in keyof Value]: Jsonify<Value[Key]> } : Value;
+export type College = Jsonify<typeof schema.colleges.$inferSelect>;
+export type Member = Jsonify<typeof schema.memberships.$inferSelect>;
+export type Profile = Jsonify<typeof schema.profiles.$inferSelect>;
+export type Group = Jsonify<typeof schema.groups.$inferSelect>;
+export type Note = Omit<Jsonify<typeof schema.notes.$inferSelect>, 'collegeId' | 'authorId'> & { authorName: string };
+export type Event = Jsonify<typeof schema.events.$inferSelect> & { collegeName?: string };
+export type Assignment = Jsonify<typeof schema.assignments.$inferSelect>;
+export type Submission = Jsonify<typeof schema.submissions.$inferSelect>;
+export type Person = { id: string; name: string; role: string; department: string; branch: string; semester: string; section: string };
+export type Post = Jsonify<typeof schema.posts.$inferSelect> & { authorName: string; likes: number; liked: boolean; readCount: number; read: boolean; comments: { id: string; postId: string; authorName: string; body: string; createdAt: string }[] };
+export type Session = {
+  user: { id: string; name?: string; email?: string; platformAdmin: boolean } | null;
+  profile?: Profile;
+  member?: Member | null;
+  notifications?: Jsonify<typeof schema.notifications.$inferSelect>[];
+  projects?: Jsonify<typeof schema.projects.$inferSelect>[];
+  follows?: Jsonify<typeof schema.follows.$inferSelect>[];
+};
+export type Campus = {
+  college: College;
+  posts: Post[];
+  notes: Note[];
+  groups: Group[];
+  joins: Jsonify<typeof schema.groupMembers.$inferSelect>[];
+  groupRequests: Jsonify<typeof schema.groupMembers.$inferSelect>[];
+  events: Event[];
+  assignments: Assignment[];
+  submissions: Submission[];
+  attendance: Jsonify<typeof schema.attendance.$inferSelect>[];
+  people: Person[];
+  memberRequests: (Member & { name: string })[];
+  messages: Jsonify<typeof schema.messages.$inferSelect>[];
+  units: Jsonify<typeof schema.academicUnits.$inferSelect>[];
+  registrations: Jsonify<typeof schema.registrations.$inferSelect>[];
+  logs: Jsonify<typeof schema.auditLogs.$inferSelect>[];
+};
+export type Network = { colleges: College[]; events: Event[] };
+export type Platform = { colleges: College[]; requests: (Member & { name: string })[]; logs: Campus['logs'] };
